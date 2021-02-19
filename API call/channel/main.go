@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"sync"
 	"time"
 )
 
@@ -20,19 +21,27 @@ func apiCall(i int) {
 
 func main() {
 	numArray := makeRange(0, 1000)
+	s1 := numArray
+	s1 = s1[:500]
 	start := time.Now()
-	done := make(chan bool)
-	count1 := 0
-	go func() {
-		for i := range numArray {
+	var wg sync.WaitGroup
+	func() {
+		for i := range s1 {
+			wg.Add(1)
 			go apiCall(i)
-			count1++
-			done <- true
+			wg.Done()
 		}
 	}()
-	for i := 1; i <= 1000; i++ {
-		<-done
-	}
+	func() {
+		for i := range s1 {
+			i += 500
+			wg.Add(1)
+			go apiCall(i)
+			wg.Done()
+		}
+	}()
+	wg.Wait()
+
 	elapsed := time.Since(start)
-	log.Println("Time taken", elapsed, "and Count", count1)
+	log.Println("Time taken", elapsed)
 }
