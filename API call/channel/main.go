@@ -30,13 +30,9 @@ func main() {
 			wg.Add(1)
 			go apiCall(i)
 			wg.Done()
-		}
-	}()
-	func() {
-		for i := range s1 {
-			i += 500
+			j := 500 + i
 			wg.Add(1)
-			go apiCall(i)
+			go apiCall(j)
 			wg.Done()
 		}
 	}()
